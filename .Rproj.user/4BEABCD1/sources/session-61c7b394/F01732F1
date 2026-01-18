@@ -3,7 +3,7 @@
     "path": "~/Documents/cursos/R_for_data_science_wickham-grolemund/01_whole_game.qmd",
     "project_path": "01_whole_game.qmd",
     "type": "quarto_markdown",
-    "hash": "2351022366",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1768700111965.0,
@@ -23,11 +23,11 @@
         "chunk_output_type": "console"
     },
     "folds": "",
-    "lastKnownWriteTime": 1768708659,
+    "lastKnownWriteTime": 1768709010,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1768708659777,
+    "last_content_update": 1768709010,
     "read_only": false,
     "read_only_alternatives": []
 }
