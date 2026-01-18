@@ -1,0 +1,307 @@
+---
+title: "Whole game"
+format: docx
+editor: visual
+echo: TRUE
+warning: FALSE
+message: FALSE
+results: FALSE
+editor_options: 
+  chunk_output_type: console
+---
+
+# Welcome and Introduction
+
+El siguiente repositorio será a partir del siguiente libro guía: https://r4ds.hadley.nz/preface-2e.html.New co-author: Mine Çetinkaya-Rundel.
+
+Próximas herramientas a leer:
+- https://ggplot2-book.org/
+- https://www.tidymodels.org/ 
+- https://www.tmwr.org/ 
+- https://quarto.org/ 
+
+Data science is an exciting discipline that allows you to transform raw data into understanding (comprensión), insight (perspectiva), and knowledge (conocimiento).
+
+Typical data science project:
+
+1) Import
+2) Tidy
+3) Transform - Visualize - Model
+4) Communicate
+
+*Wranglind*: Together, tidying and transforming are called wrangling because getting your data in a form that’s natural to work with often feels like a fight!
+
+You don’t need to be an expert programmer to be a successful data scientist, but learning more about programming pays off because becoming a better programmer allows you to automate common tasks and solve new problems with greater ease.
+
+```{r, message=TRUE}
+library(tidyverse)
+```
+
+This tells you that tidyverse loads nine packages: `dplyr, forcats, ggplot2, lubridate, purrr, readr, stringr, tibble, tidyr`. Message: It also tells you which functions from the tidyverse conflict with functions in base R (or from other packages you might have loaded)
+
+Packages in the tidyverse change fairly frequently. You can see if updates are available by running `tidyverse_update()`.
+
+We’ll use many packages from outside the tidyverse in this book. For example, we’ll use the following packages because they provide interesting datasets for us to work with in the process of learning R:
+
+```{r}
+# install.packages(
+#   c("arrow", "babynames", "curl", "duckdb", "gapminder", 
+#     "ggrepel", "ggridges", "ggthemes", "hexbin", "janitor", "Lahman", 
+#     "leaflet", "maps", "nycflights13", "openxlsx", "palmerpenguins", 
+#     "repurrrsive", "tidymodels", "writexl")
+#   )
+```
+
+*Para comentar varias líneas de código a la vez:* command + shift + c 
+
+# Whole game
+
+Goal in this part of the book is to give you a rapid overview of the main tools of data science: importing, tidying, transforming, and visualizing data.
+
+## Data visualization
+
+This chapter focuses on `ggplot2`.
+
+Data:
+
+```{r}
+library(palmerpenguins) # base de datos de pingüinos
+library(ggthemes) # paleta de colores
+
+palmerpenguins::penguins
+
+view(penguins) # interactive data viewer
+glimpse(penguins) 
+
+?penguins
+```
+
+In the tidyverse, we use special data frames called *tibbles* that you will learn more about soon.
+
+Con mis conocimientos, intentaré replicar la figura que aparece ahí, o lo más parecido que pueda.
+
+```{r}
+ggplot(penguins, aes(x = flipper_length_mm,
+                     y = body_mass_g))+
+  geom_point(aes(colour = species, shape = species))+
+  geom_smooth()+
+  scale_colour_manual(values = c("black", "gold", "lightblue"))+
+  labs(x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       title = "Body mass and flipper length",
+       subtitle = "Dimensions for Adelie, Chinstrap and Gentoo Penguins")
+```
+
+Lo logré!! Igual leeré el cap. Los colores evidentemente no son los mismos, pero detalles. Sí, me faltó algo que no supe resolver con el gráfico directamente (aunque podría renombrar la columna de penguins, pero no es la idea, es que en la leyenda sea "Species", en vez de "species").
+
+Layers of ggplot.
+
+Código final del libro:
+
+```{r}
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point(aes(color = species, shape = species)) +
+  geom_smooth(method = "lm") +  # importante! No me había fijado en eso
+  labs(
+    title = "Body mass and flipper length",
+    subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+    x = "Flipper length (mm)", y = "Body mass (g)",
+    color = "Species", shape = "Species" # resuelta mi duda
+  ) +
+  scale_color_colorblind()
+```
+
+### Exercises
+
+Otro ejemplo, sacarle el error estándar a geom_smooth():
+
+```{r}
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g, color = island)
+) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+Will these two graphs look different? Why/why not?
+Yo creo que se verán iguales, porque es la misma base de datos y los mismos ejes.
+
+```{r}
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point() +
+  geom_smooth()
+
+ggplot() +
+  geom_point(
+    data = penguins,
+    mapping = aes(x = flipper_length_mm, y = body_mass_g)
+  ) +
+  geom_smooth(
+    data = penguins,
+    mapping = aes(x = flipper_length_mm, y = body_mass_g)
+  )
+```
+
+Como se escribe realmente o de manera actual:
+
+```{r}
+penguins %>%
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+```
+
+### Variables categoricas
+
+```{r}
+ggplot(penguins, aes(x = species))+
+  geom_bar() 
+
+# si quiero ordenar barras por frecuencia:
+
+ggplot(penguins, aes(x = fct_infreq(species)))+
+  geom_bar() 
+```
+
+### Histograma de variables continuas
+
+```{r}
+ggplot(penguins, aes(x = body_mass_g))+
+  geom_histogram(binwidth = 200) # ancho de barras
+
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 20)
+
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 2000)
+```
+
+### Density plot
+
+Similar información a histograma.
+
+```{r}
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_density()
+```
+
+### Exercises
+
+Make a bar plot of species of penguins, where you assign species to the y aesthetic. How is this plot different?
+
+```{r}
+ggplot(penguins, aes(y = species))+
+  geom_bar()
+```
+
+How are the following two plots different? Which aesthetic, color or fill, is more useful for changing the color of bars?
+
+Entiendo que color rellenerá solo en contorno, y fill el relleno completo. Sirve mas fill.
+
+```{r}
+ggplot(penguins, aes(x = species)) +
+  geom_bar(color = "red")
+
+ggplot(penguins, aes(x = species)) +
+  geom_bar(fill = "red")
+```
+
+Make a histogram of the carat variable in the diamonds dataset that is available when you load the tidyverse package. Experiment with different binwidths. What binwidth reveals the most interesting patterns?
+
+```{r}
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram()
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 10)
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 100)
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 1000)
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 1)
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 0.5)
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 0.01)
+
+ggplot(diamonds, aes(x = carat))+
+  geom_histogram(binwidth = 0.008)
+
+# brigido!!
+```
+
+### Numerical and categorical variable
+
+```{r}
+# boxplots
+ggplot(penguins, aes(x = species, y = body_mass_g))+
+  geom_boxplot()
+
+# también gráficos de densidad
+ggplot(penguins, aes(x = body_mass_g, colour = species))+
+  geom_density(linewidth = 0.75)
+
+ggplot(penguins, aes(x = body_mass_g, colour = species, fill = species))+
+  geom_density(alpha = 0.5) # por si se sobreponen
+```
+
+### Dos variables categoricas
+
+```{r}
+ggplot(penguins, aes(x = island, fill = species))+
+  geom_bar()
+
+# The second plot, a relative frequency plot created by setting position = "fill" in the geom, is more useful for comparing species distributions across islands since it’s not affected by the unequal numbers of penguins across the islands.
+
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar(position = "fill")
+```
+
+### Three or more variables
+
+```{r}
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species, shape = island))
+
+# facetas
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species, shape = species)) +
+  facet_wrap(~island)
+```
+
+### Exercises
+
+The mpg data frame that is bundled with the ggplot2 package contains 234 observations collected by the US Environmental Protection Agency on 38 car models. Which variables in mpg are categorical? Which variables are numerical? (Hint: Type ?mpg to read the documentation for the dataset.) How can you see this information when you run mpg?
+
+```{r}
+glimpse(mpg) 
+# ahí pude ver todas las variables que son numéricas o categóricas.
+```
+
+Make a scatterplot of hwy vs. displ using the mpg data frame. Next, map a third, numerical variable to color, then size, then both color and size, then shape. How do these aesthetics behave differently for categorical vs. numerical variables?
+
+```{r}
+ggplot(mpg, aes(x = hwy, y = displ, colour = cty, size = cty, shape = class)) +
+  geom_point()
+```
+
+In the scatterplot of hwy vs. displ, what happens if you map a third variable to linewidth?
+
+```{r}
+ggplot(mpg, aes(x = hwy, y = displ))+
+  geom_point() +
+  geom_line(aes(x = hwy, y = cty))
+```
+
